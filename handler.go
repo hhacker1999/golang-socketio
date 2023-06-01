@@ -2,9 +2,11 @@ package gosocketio
 
 import (
 	"encoding/json"
-	"github.com/graarh/golang-socketio/protocol"
-	"sync"
+	"fmt"
 	"reflect"
+	"sync"
+
+	"github.com/graarh/golang-socketio/protocol"
 )
 
 const (
@@ -13,12 +15,14 @@ const (
 	OnError         = "error"
 )
 
-/**
+/*
+*
 System handler function for internal event processing
 */
 type systemHandler func(c *Channel)
 
-/**
+/*
+*
 Contains maps of message processing functions
 */
 type methods struct {
@@ -29,14 +33,16 @@ type methods struct {
 	onDisconnection systemHandler
 }
 
-/**
+/*
+*
 create messageHandlers map
 */
 func (m *methods) initMethods() {
 	m.messageHandlers = make(map[string]*caller)
 }
 
-/**
+/*
+*
 Add message processing function, and bind it to given method
 */
 func (m *methods) On(method string, f interface{}) error {
@@ -52,7 +58,8 @@ func (m *methods) On(method string, f interface{}) error {
 	return nil
 }
 
-/**
+/*
+*
 Find message processing function associated with given method
 */
 func (m *methods) findMethod(method string) (*caller, bool) {
@@ -79,7 +86,8 @@ func (m *methods) callLoopEvent(c *Channel, event string) {
 	f.callFunc(c, &struct{}{})
 }
 
-/**
+/*
+*
 Check incoming message
 On ack_resp - look for waiter
 On ack_req - look for processing function and send ack_resp
@@ -99,6 +107,7 @@ func (m *methods) processIncomingMessage(c *Channel, msg *protocol.Message) {
 		}
 
 		data := f.getArgs()
+		fmt.Println(string(msg.Args))
 		err := json.Unmarshal([]byte(msg.Args), &data)
 		if err != nil {
 			return
